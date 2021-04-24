@@ -1,64 +1,53 @@
 const {
   PI,
 } = Math;
-// 角度转弧度
-const toRadian = (degress: number): number => degress * PI / 180;
 
 class Controller {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
   private size: number;
   private prizes: TurntableTypes.Prize[];
-  private canvas: HTMLCanvasElement | null;
-  private ctx: CanvasRenderingContext2D | null;
   private startRadian: number;
   private eachRadian: number;
+  private midRadians: number[];
 
   constructor(size: number, prizes: TurntableTypes.Prize[]) {
+    this.canvas = document.getElementById('__turntable-canvas') as HTMLCanvasElement;
+    if (!this.canvas) {
+      throw new Error('Can not get canvas element!');
+    }
+
+    this.ctx = this.canvas.getContext && this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    if (!this.ctx) {
+      throw new Error('Can not get canvas context!');
+    }
+
     this.size = size;
-    this.prizes = this.prizeImageWrapper(prizes);
-    this.canvas = null;
-    this.ctx = null;
-    this.eachRadian = toRadian(360 / prizes.length);
-    this.startRadian = toRadian(-90);
+    this.prizes = this.prizeImageWrap(prizes);
+    // 起始弧度
+    this.startRadian = -PI / 2;
+    // 每个奖品块的平均弧度
+    this.eachRadian = 2 * PI / prizes.length;
+    // Array<每个奖品块到该块中心的弧度>
+    this.midRadians = prizes.map((_, index) => (this.eachRadian * index) + (this.eachRadian / 2));
   }
 
   get radius() {
     return this.size / 2;
   }
 
-  getCanvas(): HTMLCanvasElement {
-    if (this.canvas) return this.canvas;
-    this.canvas = document.getElementById('__turntable') as HTMLCanvasElement;
-    return this.canvas;
-  }
-
-  getContext(): CanvasRenderingContext2D {
-    if (this.ctx) return this.ctx;
-    const canvas = this.getCanvas();
-    const ctx = canvas && canvas.getContext && canvas.getContext('2d');
-    if (!ctx) {
-      throw new Error('Could not get canvas element or canvas context!');
-    }
-    return ctx;
-  }
-
   init() {
-    const ctx = this.getContext();
-    ctx.translate(this.radius, this.radius);
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(0, 0, this.radius, 0, PI * 2);
-    ctx.fillStyle = 'transparent';
-    ctx.fill();
-    ctx.restore();
+    this.ctx.translate(this.radius, this.radius);
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, this.radius, 0, PI * 2);
+    this.ctx.fillStyle = 'transparent';
+    this.ctx.fill();
+    this.ctx.restore();
     this.render();
   }
 
   render() {
-    this.paintPrizes();
-  }
-
-  paintPrizes() {
-    const ctx = this.getContext();
     let { startRadian } = this;
     let endRadian = 0;
 
@@ -66,54 +55,58 @@ class Controller {
       endRadian = this.eachRadian + startRadian;
 
       // 绘制奖品块
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, this.radius, startRadian, endRadian);
-      ctx.fillStyle = item.backgroundColor;
-      ctx.fill();
-      ctx.restore();
-      ctx.save();
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, 0);
+      this.ctx.arc(0, 0, this.radius, startRadian, endRadian);
+      this.ctx.fillStyle = item.backgroundColor;
+      this.ctx.fill();
+      this.ctx.restore();
+      this.ctx.save();
 
-      ctx.rotate(startRadian + (PI / 2) + (this.eachRadian / 2));
-      ctx.save();
+      this.ctx.rotate(startRadian + (PI / 2) + (this.eachRadian / 2));
+      this.ctx.save();
       // 绘制奖品文字
-      ctx.translate(0, -0.7 * this.radius);
-      ctx.font = item.fontStyle;
-      ctx.fillStyle = '#000000';
-      ctx.fillText(
+      this.ctx.translate(0, -0.7 * this.radius);
+      this.ctx.font = item.fontStyle;
+      this.ctx.fillStyle = '#000000';
+      this.ctx.fillText(
         item.title,
-        -ctx.measureText(item.title).width / 2,
+        -this.ctx.measureText(item.title).width / 2,
         0,
         100,
       );
-      ctx.restore();
+      this.ctx.restore();
 
       // 绘制奖品图片
-      if (item.createdImg && item.image) {
-        ctx.translate(0, -0.6 * this.radius);
-        ctx.drawImage(
-          item.createdImg,
+      if (item.image && item.image.canvasImageSource) {
+        this.ctx.translate(0, -0.6 * this.radius);
+        this.ctx.drawImage(
+          item.image.canvasImageSource,
           -item.image.width / 2,
           0,
           item.image.width,
           item.image.height,
         );
       }
-      ctx.restore();
-      ctx.restore();
+      this.ctx.restore();
+      this.ctx.restore();
+      this.ctx.restore();
 
       startRadian = endRadian;
     });
-    ctx.restore();
+    this.ctx.restore();
   }
 
-  prizeImageWrapper(prizes: TurntableTypes.Prize[]): TurntableTypes.Prize[] {
+  prizeImageWrap(prizes: TurntableTypes.Prize[]): TurntableTypes.Prize[] {
     return prizes.map((item) => {
       if (item.image) {
-        const img = new Image(item.image.width, item.image.height);
-        img.src = item.image.src;
-        item.createdImg = img;
-        return item;
+        if (item.image.canvasImageSource) return item;
+        if (typeof item.image.src === 'string') {
+          const img = new Image(item.image.width, item.image.height);
+          img.src = item.image.src;
+          item.image.canvasImageSource = img;
+          return item;
+        }
       }
       return item;
     });

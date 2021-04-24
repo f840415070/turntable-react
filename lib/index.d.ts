@@ -1,6 +1,7 @@
 declare namespace TurntableTypes {
   interface PrizeImage {
-    src: string,
+    src?: string,
+    canvasImageSource?: CanvasImageSource,
     width: number,
     height: number,
   }
@@ -10,12 +11,17 @@ declare namespace TurntableTypes {
     backgroundColor: string,
     fontStyle: string,
     fontColor?: string,
-    image?: PrizeImage,
-    createdImg?: HTMLOrSVGImageElement,
+    image?: PrizeImage | null,
   }
 
-  interface Props {
+  interface ControllerOpts {
+    renderAfterImagesLoaded?: boolean,
+  }
+
+  interface Props extends ControllerOpts {
     size: number,
     prizes: Prize[],
+    onPress: (...args: any[]) => Promise<number>
+    children?: React.ReactNode,
   }
 }

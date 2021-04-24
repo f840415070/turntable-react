@@ -7,13 +7,13 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
     prizes,
     children,
     onPress,
+    ...opts
   } = props;
 
-  let controller;
+  let controller: Controller;
   useEffect(() => {
-    controller = new Controller(size, prizes);
+    controller = new Controller(size, prizes, opts);
     controller.init();
-    console.log('转盘渲染完成');
   }, []);
 
   // 启动抽奖

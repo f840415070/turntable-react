@@ -6,7 +6,7 @@ const testColors: string[] = [
   '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF', '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF',
 ];
 const testPrizes: TurntableTypes.Prize[] = Array(8).fill(0).map((_, index) => ({
-  title: index === 0 ? '谢谢参与' : `${(index + 1) * 1000}元大奖`,
+  title: index === 0 ? '谢谢参与' : `${index * 1000}元大奖`,
   backgroundColor: testColors[index],
   fontStyle: '16px Arial',
   image: index === 0 ? null : ({
@@ -20,7 +20,7 @@ function App() {
   const getPrizeResult = () => {
     return new Promise<number>((resolve, reject) => {
       const testResult = Math.floor(Math.random() * 8);
-      if (testResult >= 7) { // 未达条件不启动抽奖
+      if (testResult > 7) { // 未达条件不启动抽奖
         reject();
       }
       // setTimeout 模拟接口请求结果
@@ -30,13 +30,17 @@ function App() {
     });
   };
 
+  const complete = (index: number) => {
+    console.log(`恭喜你抽中 - ${testPrizes[index].title}！`);
+  };
+
   return (
     <div className="turntable">
       <Turntable
         size={360}
         prizes={testPrizes}
-        onPress={getPrizeResult}
-        renderAfterImagesLoaded={true}
+        onStart={getPrizeResult}
+        onComplete={complete}
       >
         {/* 转盘指针 点击按钮 */}
         <div className="turntable-pointer">

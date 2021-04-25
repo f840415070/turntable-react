@@ -15,13 +15,16 @@ declare namespace TurntableTypes {
   }
 
   interface ControllerOpts {
-    renderAfterImagesLoaded?: boolean,
+    onComplete: (prizeIndex: number) => void,
+    afterImagesLoaded: boolean,
+    afterImagesLoadedTimeout: number,
+    turns: number,
   }
 
-  interface Props extends ControllerOpts {
+  interface Props extends Partial<ControllerOpts> {
     size: number,
     prizes: Prize[],
-    onPress: (...args: any[]) => Promise<number>
+    onStart: () => Promise<number>
     children?: React.ReactNode,
   }
 }

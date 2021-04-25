@@ -40,6 +40,7 @@ function checkOpts(opts: Partial<TurntableTypes.ControllerOpts>): TurntableTypes
     ) ? opts.afterImagesLoadedTimeout : 300,
     onComplete: opts.onComplete && typeof opts.onComplete === 'function' ? opts.onComplete : () => {},
     turns: opts.turns && opts.turns > 0 ? opts.turns : 20,
+    pointToCenter: opts.pointToCenter || false,
   });
 }
 
@@ -50,7 +51,7 @@ class Controller {
   private radius: number;
   private startRad: number; // 起始弧度
   private eachRad: number; // 每个奖品块的平均弧度
-  private distanceToPointerRads: number[]; // Array<从每个奖品块中点的弧度到指针指向中心的弧度值>
+  private rotateToPointerRads: number[]; // Array<从每个奖品块中点的弧度到指针指向中心的弧度值>
   private opts: TurntableTypes.ControllerOpts;
   private isInitRendered: boolean; // 初次渲染完成
 
@@ -75,9 +76,12 @@ class Controller {
     this.opts = checkOpts(opts);
     console.log(this.opts);
     this.radius = size / 2;
-    this.startRad = -PI / 2;
     this.eachRad = 2 * PI / prizes.length;
-    this.distanceToPointerRads = prizes.map((_, index) => 1.5 * PI - (this.eachRad * index + this.eachRad / 2));
+    this.startRad = this.getStartRad();
+    this.rotateToPointerRads = prizes.map((_, index) => {
+      const rotateRad = 2 * PI + this.startRad - (this.eachRad * index + this.eachRad / 2);
+      return rotateRad > 0 ? rotateRad : rotateRad + 2 * PI;
+    });
     this.isInitRendered = false;
     this.isRotating = false;
   }
@@ -93,43 +97,53 @@ class Controller {
     this.initRender();
   }
 
-  rotate(targetIndex: number) {
-    const distanceRad = this.distanceToPointerRads[targetIndex] + 2 * PI * this.opts.turns;
-    this.isRotating = true;
-    this._rotate(distanceRad, targetIndex);
+  getStartRad() {
+    return -PI / 2 - (this.opts.pointToCenter ? this.eachRad / 2 : 0);
   }
 
-  _rotate(distanceRad: number, prizeIndex: number) {
+  getRotateRad(index: number) {
+    return this.rotateToPointerRads[index]
+      + 2 * PI * this.opts.turns
+      + (this.opts.pointToCenter ? this.eachRad / 2 : 0);
+  }
+
+  rotate(targetIndex: number) {
+    const rotateRad = this.getRotateRad(targetIndex);
+    this.isRotating = true;
+    this._rotate(rotateRad, targetIndex);
+  }
+
+  _rotate(rotateRad: number, prizeIndex: number) {
     // this.startRad += 0.1 * PI;
-    this.startRad += (distanceRad - this.startRad) / 20;
-    if (distanceRad - this.startRad <= 0.01) {
+    this.startRad += (rotateRad - this.startRad) / 20;
+    if (rotateRad - this.startRad <= 0.01) {
       this.opts.onComplete(prizeIndex);
       this._reset();
       return;
     }
     this._render();
     requestAnimationFrame(() => {
-      this._rotate(distanceRad, prizeIndex);
+      this._rotate(rotateRad, prizeIndex);
     });
   }
 
   _reset() {
     this.isRotating = false;
-    this.startRad = -PI / 2;
+    this.startRad = this.getStartRad();
   }
 
   initRender() {
     if ((this.prizes.some((item) => !!item.image)) && this.opts.afterImagesLoaded) {
       // 等待所有图片都进入加载结束状态再绘制转盘
-      // 避免因为图片未加载完 canvas drawImage 失败导致图片没有绘制
+      // 避免因为图片未加载完，canvas drawImage 失败而导致图片没有绘制
       this.allImagesLoaded().then((_) => {
-        this._renderIfNotRendered();
+        this._initRender();
       });
       setTimeout(() => {
-        this._renderIfNotRendered();
+        this._initRender();
       }, this.opts.afterImagesLoadedTimeout);
     } else {
-      this._renderIfNotRendered();
+      this._initRender();
     }
   }
 
@@ -156,7 +170,7 @@ class Controller {
     return Promise.allSettled(promises);
   }
 
-  _renderIfNotRendered() {
+  _initRender() {
     if (!this.isInitRendered) {
       this._render();
       this.isInitRendered = true;

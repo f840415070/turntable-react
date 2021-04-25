@@ -19,6 +19,7 @@ declare namespace TurntableTypes {
     afterImagesLoaded: boolean,
     afterImagesLoadedTimeout: number,
     turns: number,
+    pointToCenter: boolean,
   }
 
   interface Props extends Partial<ControllerOpts> {

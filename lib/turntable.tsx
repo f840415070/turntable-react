@@ -6,7 +6,7 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
     size,
     prizes,
     children,
-    onPress,
+    onStart,
     ...opts
   } = props;
 
@@ -18,9 +18,11 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
 
   // 启动抽奖
   const start = () => {
-    onPress()
+    if (controller.isRotating) return;
+    onStart()
       .then((res) => {
         console.log(res);
+        controller.rotate(res);
       })
       .catch(() => {});
   };
@@ -44,7 +46,6 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          overflow: 'visible',
         }}
       >
         <div className="__turntable-pointer" onClick={start}>

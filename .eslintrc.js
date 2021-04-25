@@ -152,5 +152,9 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': ['error'],
     'lines-between-class-members': 'off',
     'no-param-reassign': 'off',
+    'space-before-function-paren': 'off',
+    'prefer-promise-reject-errors': 'off',
+    'jsx-a11y/click-events-have-key-events': 'off',
+    'jsx-a11y/no-static-element-interactions': 'off',
   },
 };

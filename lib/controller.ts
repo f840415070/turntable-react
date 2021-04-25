@@ -110,20 +110,27 @@ class Controller {
   rotate(targetIndex: number) {
     const rotateRad = this.getRotateRad(targetIndex);
     this.isRotating = true;
-    this._rotate(rotateRad, targetIndex);
+    this._rotate(rotateRad, targetIndex, +new Date());
   }
 
-  _rotate(rotateRad: number, prizeIndex: number) {
+  _rotate(rotateRad: number, prizeIndex: number, startTime: number) {
     // this.startRad += 0.1 * PI;
+    // console.log((this.startRad + this.getStartRad()) % this.rotateToPointerRads[prizeIndex]);
+    // if (+new Date() - startTime >= 3000) {
+    //   this.opts.onComplete(prizeIndex);
+    //   this._reset();
+    //   return;
+    // }
     this.startRad += (rotateRad - this.startRad) / 20;
     if (rotateRad - this.startRad <= 0.01) {
+      console.log(rotateRad, this.startRad);
       this.opts.onComplete(prizeIndex);
       this._reset();
       return;
     }
     this._render();
     requestAnimationFrame(() => {
-      this._rotate(rotateRad, prizeIndex);
+      this._rotate(rotateRad, prizeIndex, startTime);
     });
   }
 

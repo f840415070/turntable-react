@@ -17,6 +17,8 @@ declare namespace TurntableTypes {
 
   interface ControllerOpts {
     onComplete: (prizeIndex: number) => void,
+    timeout: number,
+    onTimeout: () => void,
     renderIfLoaded: boolean,
     renderIfLoadedTimeout: number,
     pointToMiddle: boolean,
@@ -25,7 +27,9 @@ declare namespace TurntableTypes {
   interface Props extends Partial<ControllerOpts> {
     size: number,
     prizes: Prize[],
-    onStart: (abort: () => void) => Promise<number>,
+    onDraw: (abort: () => void) => Promise<number>,
     children?: React.ReactNode,
   }
+
+  type controllerRef = {timeNode: number}
 }

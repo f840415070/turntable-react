@@ -23,7 +23,7 @@ function App() {
       if (!canStart) { // 未达条件不启动抽奖
         reject();
       }
-      // setTimeout 模拟接口请求结果
+      // setTimeout 模拟接口请求抽奖结果
       setTimeout(() => {
         const resultPrizeIndex = Math.floor(Math.random() * 8);
         if (!canStart) { // 未达条件不启动抽奖
@@ -31,10 +31,7 @@ function App() {
         } else {
           resolve(resultPrizeIndex);
         }
-      }, 2000);
-      setTimeout(() => {
-        abort();
-      }, 1000);
+      }, 100);
     });
   };
 
@@ -42,13 +39,18 @@ function App() {
     console.log(`恭喜你抽中 - ${testPrizes[index].title}！`);
   };
 
+  const timeout = () => {
+    console.log('已超时');
+  };
+
   return (
     <div className="turntable">
       <Turntable
         size={360}
         prizes={testPrizes}
-        onStart={getPrizeResult}
+        onDraw={getPrizeResult}
         onComplete={complete}
+        onTimeout={timeout}
       >
         {/* 转盘指针 点击按钮 */}
         <div className="turntable-pointer">

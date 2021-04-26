@@ -17,16 +17,24 @@ const testPrizes: TurntableTypes.Prize[] = Array(8).fill(0).map((_, index) => ({
 }));
 
 function App() {
-  const getPrizeResult = () => {
+  const canStart = true;
+  const getPrizeResult = (abort: () => void) => {
     return new Promise<number>((resolve, reject) => {
-      const testResult = Math.floor(Math.random() * 8);
-      if (testResult > 7) { // 未达条件不启动抽奖
+      if (!canStart) { // 未达条件不启动抽奖
         reject();
       }
       // setTimeout 模拟接口请求结果
       setTimeout(() => {
-        resolve(testResult);
-      }, 50);
+        const resultPrizeIndex = Math.floor(Math.random() * 8);
+        if (!canStart) { // 未达条件不启动抽奖
+          reject();
+        } else {
+          resolve(resultPrizeIndex);
+        }
+      }, 2000);
+      setTimeout(() => {
+        abort();
+      }, 1000);
     });
   };
 

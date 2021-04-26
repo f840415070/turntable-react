@@ -19,10 +19,12 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
   // 启动抽奖
   const start = () => {
     if (controller.isRotating) return;
-    onStart()
-      .then((res) => {
-        console.log(res);
-        controller.rotate(res);
+    controller.reset();
+    controller.rotate();
+    onStart(controller.abort.bind(controller))
+      .then((index) => {
+        console.log(index);
+        controller.setCurrentPrizeIndex(index);
       })
       .catch(() => {});
   };

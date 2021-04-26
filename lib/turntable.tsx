@@ -6,27 +6,35 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
     size,
     prizes,
     children,
-    onStart,
+    onDraw,
     ...opts
   } = props;
 
   let controller: Controller;
+
   useEffect(() => {
     controller = new Controller(size, prizes, opts);
     controller.init();
   }, []);
 
-  // 启动抽奖
-  const start = () => {
+  const drawing = (startTime: number) => {
+    onDraw(controller.abort.bind(controller))
+      .then((index) => {
+        if (startTime === controller.ref.timeNode) {
+          console.log(index);
+          controller.setCurrentPrizeIndex(index);
+        } else {
+          console.warn(index, '时间已过');
+        }
+      })
+      .catch(() => {});
+  };
+
+  const run = () => {
     if (controller.isRotating) return;
     controller.reset();
     controller.rotate();
-    onStart(controller.abort.bind(controller))
-      .then((index) => {
-        console.log(index);
-        controller.setCurrentPrizeIndex(index);
-      })
-      .catch(() => {});
+    drawing(controller.ref.timeNode);
   };
 
   return (
@@ -50,7 +58,7 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
           justifyContent: 'center',
         }}
       >
-        <div className="__turntable-pointer" onClick={start}>
+        <div className="__turntable-pointer" onClick={run}>
           {children}
         </div>
       </div>

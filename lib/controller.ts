@@ -40,8 +40,10 @@ function checkOpts(opts: Partial<TurntableTypes.ControllerOpts>): TurntableTypes
     renderIfLoadedTimeout: (
       opts.renderIfLoadedTimeout && opts.renderIfLoadedTimeout > 0
     ) ? opts.renderIfLoadedTimeout : 300,
-    onComplete: opts.onComplete && typeof opts.onComplete === 'function' ? opts.onComplete : () => {},
+    onComplete: typeof opts.onComplete === 'function' ? opts.onComplete : () => {},
     pointToMiddle: opts.pointToMiddle || false,
+    timeout: opts.timeout && opts.timeout > 0 ? opts.timeout : 10000,
+    onTimeout: typeof opts.onTimeout === 'function' ? opts.onTimeout : () => {},
   });
 }
 
@@ -60,6 +62,7 @@ class Controller {
   private isAborted: boolean; // 中止转动
 
   public isRotating: boolean;
+  public ref: TurntableTypes.controllerRef;
 
   constructor(
     size: number,
@@ -91,6 +94,7 @@ class Controller {
     this.isRotating = false;
     this._CURRENT_PRIZE_INDEX = -9999;
     this.isAborted = false;
+    this.ref = { timeNode: 0 };
   }
 
   init() {
@@ -140,11 +144,14 @@ class Controller {
     this.startRad = this._initStartRad;
     this._CURRENT_PRIZE_INDEX = -9999;
     this.isAborted = false;
+    this.ref.timeNode = +new Date();
   }
 
   rotate() {
     this.isRotating = true;
-    this._rotate(+new Date());
+    const runTime = +new Date();
+    this._rotate(runTime);
+    this.ref.timeNode = runTime;
   }
 
   _easeRotate(rotateRad: number) {
@@ -167,6 +174,12 @@ class Controller {
         + 40 * PI
         + (this.opts.pointToMiddle ? (this.eachRad / 2) : 0);
       this._easeRotate(rotateRad);
+      return;
+    }
+    if (+new Date() - startTime > this.opts.timeout) {
+      this.reset();
+      this._render();
+      this.opts.onTimeout();
       return;
     }
     if (this.isAborted) {

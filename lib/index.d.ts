@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 declare namespace TurntableTypes {
   interface PrizeImage {
     src?: string,
@@ -16,16 +17,15 @@ declare namespace TurntableTypes {
 
   interface ControllerOpts {
     onComplete: (prizeIndex: number) => void,
-    afterImagesLoaded: boolean,
-    afterImagesLoadedTimeout: number,
-    turns: number,
-    pointToCenter: boolean,
+    renderIfLoaded: boolean,
+    renderIfLoadedTimeout: number,
+    pointToMiddle: boolean,
   }
 
   interface Props extends Partial<ControllerOpts> {
     size: number,
     prizes: Prize[],
-    onStart: () => Promise<number>
+    onStart: (abort: () => void) => Promise<number>,
     children?: React.ReactNode,
   }
 }

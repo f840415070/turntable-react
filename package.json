@@ -3,14 +3,15 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "start": "webpack-dev-server --mode development --host 0.0.0.0",
+    "start": "webpack-dev-server --mode development",
     "build": "webpack --mode production"
   },
   "dependencies": {
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+
   },
   "devDependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
     "@babel/preset-react": "^7.12.10",

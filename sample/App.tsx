@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import React from 'react';
 import Turntable from '../lib/turntable';
 import './App.css';
@@ -24,7 +25,7 @@ const testPrizes: TurntableTypes.Prize[] = Array(8).fill(0).map((_, index) => ({
   background: testColors[index],
   images: index === 0 ? undefined : [
     {
-      src: '../src/gift.png',
+      src: '../sample/gift.png',
       width: 30,
       height: 30,
       fromCenter: 0.6,

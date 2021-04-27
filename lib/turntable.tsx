@@ -6,7 +6,7 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
     size,
     prizes,
     children,
-    onDraw,
+    onStart,
     ...opts
   } = props;
 
@@ -17,14 +17,11 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
     controller.init();
   }, []);
 
-  const drawing = (startTime: number) => {
-    onDraw(controller.abort.bind(controller))
+  const drawing = (fetchResult: Promise<number>, startTime: number) => {
+    fetchResult
       .then((index) => {
         if (startTime === controller.ref.timeNode) {
-          console.log(index);
           controller.setCurrentPrizeIndex(index);
-        } else {
-          console.warn(index, '时间已过');
         }
       })
       .catch(() => {});
@@ -32,9 +29,12 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
 
   const run = () => {
     if (controller.isRotating) return;
-    controller.reset();
-    controller.rotate();
-    drawing(controller.ref.timeNode);
+    const startResult = onStart(controller.abort.bind(controller));
+    if (startResult instanceof Promise) {
+      controller.reset();
+      controller.rotate();
+      drawing(startResult, controller.ref.timeNode);
+    }
   };
 
   return (

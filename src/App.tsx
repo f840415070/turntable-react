@@ -6,37 +6,53 @@ const testColors: string[] = [
   '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF', '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF',
 ];
 const testPrizes: TurntableTypes.Prize[] = Array(8).fill(0).map((_, index) => ({
-  title: index === 0 ? '谢谢参与' : `${index * 1000}元大奖`,
-  backgroundColor: testColors[index],
-  fontStyle: '16px Arial',
-  image: index === 0 ? null : ({
-    src: '../src/gift.png',
-    width: 30,
-    height: 30,
-  }),
+  texts: index === 0 ? [
+    {
+      text: '谢谢', fontStyle: '16px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.8,
+    },
+    {
+      text: '参与', fontStyle: '16px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.68,
+    },
+  ] : [
+    {
+      text: '奖品价值', fontStyle: '16px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.8,
+    },
+    {
+      text: `${index * 1000}元`, fontStyle: '16px Arial', fontColor: 'rgba(255, 40, 40, 1)', fromCenter: 0.68,
+    },
+  ],
+  background: testColors[index],
+  images: index === 0 ? undefined : [
+    {
+      src: '../src/gift.png',
+      width: 30,
+      height: 30,
+      fromCenter: 0.6,
+    },
+  ],
 }));
 
 function App() {
   const canStart = true;
-  const getPrizeResult = (abort: () => void) => {
+  const fetchPrizeResult = (abort: () => void) => {
+    if (!canStart) { // 未达条件不启动抽奖
+      return false;
+    }
     return new Promise<number>((resolve, reject) => {
-      if (!canStart) { // 未达条件不启动抽奖
-        reject();
-      }
       // setTimeout 模拟接口请求抽奖结果
       setTimeout(() => {
         const resultPrizeIndex = Math.floor(Math.random() * 8);
-        if (!canStart) { // 未达条件不启动抽奖
+        if (resultPrizeIndex < 0) { // 未达条件不启动抽奖
           reject();
         } else {
           resolve(resultPrizeIndex);
         }
-      }, 100);
+      }, 60);
     });
   };
 
   const complete = (index: number) => {
-    console.log(`恭喜你抽中 - ${testPrizes[index].title}！`);
+    console.log(`恭喜你抽中 - ${[index]} `, testPrizes[index]);
   };
 
   const timeout = () => {
@@ -48,7 +64,7 @@ function App() {
       <Turntable
         size={360}
         prizes={testPrizes}
-        onDraw={getPrizeResult}
+        onStart={fetchPrizeResult}
         onComplete={complete}
         onTimeout={timeout}
       >

@@ -20,7 +20,7 @@
   }
   if (!window.cancelAnimationFrame) {
     window.cancelAnimationFrame = function(id) {
-      clearTimeout(id);
+      window.clearTimeout(id);
     };
   }
 }(window));
@@ -31,6 +31,9 @@ const {
 } = Math;
 const {
   requestAnimationFrame,
+  cancelAnimationFrame,
+  setTimeout,
+  clearTimeout,
   devicePixelRatio = 1,
 } = window;
 
@@ -44,6 +47,10 @@ function checkOpts(opts: Partial<TurntableTypes.ControllerOpts>): TurntableTypes
     pointToMiddle: opts.pointToMiddle || false,
     timeout: opts.timeout && opts.timeout > 0 ? opts.timeout : 10000,
     onTimeout: typeof opts.onTimeout === 'function' ? opts.onTimeout : () => {},
+    auto: opts.auto !== false,
+    autoSpeed: opts.autoSpeed && opts.autoSpeed > 0 && opts.autoSpeed < 6 ? opts.autoSpeed : 2,
+    autoDelay: opts.autoDelay && opts.autoDelay >= 0 ? opts.autoDelay : 2000,
+    turntableBackground: opts.turntableBackground ? opts.turntableBackground : 'transparent',
   });
 }
 
@@ -60,6 +67,10 @@ class Controller {
   private isInitRendered: boolean; // 初次渲染完成
   private _CURRENT_PRIZE_INDEX: number; // 中奖的索引
   private isAborted: boolean; // 中止转动
+  private autoConf: {
+    timer: number,
+    rafHandle: number,
+  }; // 自动旋转配置
 
   public isRotating: boolean;
   public ref: TurntableTypes.controllerRef;
@@ -82,7 +93,6 @@ class Controller {
     this.size = size;
     this.prizes = prizes;
     this.opts = checkOpts(opts);
-    console.log(this.opts);
     this.radius = size / 2;
     this.eachRad = 2 * PI / prizes.length;
     this.startRad = this._initStartRad;
@@ -94,7 +104,11 @@ class Controller {
     this.isRotating = false;
     this._CURRENT_PRIZE_INDEX = -9999;
     this.isAborted = false;
-    this.ref = { timeNode: 0 };
+    this.ref = { timeNode: +new Date() };
+    this.autoConf = {
+      timer: -9999,
+      rafHandle: -9999,
+    };
   }
 
   init() {
@@ -103,7 +117,7 @@ class Controller {
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.arc(0, 0, this.radius, 0, PI * 2);
-    this.ctx.fillStyle = 'transparent';
+    this.ctx.fillStyle = this.opts.turntableBackground;
     this.ctx.fill();
     this.ctx.restore();
     this.initRender();
@@ -148,6 +162,7 @@ class Controller {
   }
 
   rotate() {
+    this.cancelAuto();
     this.isRotating = true;
     const runTime = +new Date();
     this._rotate(runTime);
@@ -195,8 +210,32 @@ class Controller {
     });
   }
 
+  autoStart() {
+    if (this.opts.auto) {
+      this.autoConf.timer = setTimeout(() => {
+        this.autoRotate();
+      }, this.opts.autoDelay);
+    }
+  }
+
+  cancelAuto() {
+    if (this.opts.auto) {
+      clearTimeout(this.autoConf.timer);
+      cancelAnimationFrame(this.autoConf.rafHandle);
+      this.reset();
+    }
+  }
+
+  autoRotate() {
+    this.startRad += 0.0001 * (this.opts.autoSpeed + 5) * PI;
+    this._render();
+    this.autoConf.rafHandle = requestAnimationFrame(() => {
+      this.autoRotate();
+    });
+  }
+
   initRender() {
-    if ((this.prizes.some((item) => !!item.image)) && this.opts.renderIfLoaded) {
+    if (this.prizes.some((item) => !!item.images) && this.opts.renderIfLoaded) {
       // 等待所有图片都进入加载结束状态再绘制转盘
       // 避免因为图片未加载完，canvas drawImage 失败而导致图片没有绘制
       this.allImagesLoaded().then((_) => {
@@ -213,21 +252,23 @@ class Controller {
   allImagesLoaded(): Promise<PromiseSettledResult<boolean>[]> {
     const promises: Promise<boolean>[] = [];
     this.prizes.forEach((item) => {
-      if (item.image) {
-        if (item.image.canvasImageSource) return;
-        if (typeof item.image.src === 'string') {
-          const img = new Image(item.image.width, item.image.height);
-          promises.push(new Promise((resolve, reject) => {
-            img.onload = function() {
-              resolve(true);
-            };
-            img.onerror = function() {
-              reject(false);
-            };
-          }));
-          img.src = item.image.src;
-          item.image.canvasImageSource = img;
-        }
+      if (Array.isArray(item.images) && item.images.length > 0) {
+        item.images.forEach((imageItem) => {
+          if (imageItem.canvasImageSource) return;
+          if (typeof imageItem.src === 'string') {
+            const img = new Image(imageItem.width, imageItem.height);
+            promises.push(new Promise((resolve, reject) => {
+              img.onload = function() {
+                resolve(true);
+              };
+              img.onerror = function() {
+                reject(false);
+              };
+            }));
+            img.src = imageItem.src;
+            imageItem.canvasImageSource = img;
+          }
+        });
       }
     });
     return Promise.allSettled(promises);
@@ -237,6 +278,7 @@ class Controller {
     if (!this.isInitRendered) {
       this._render();
       this.isInitRendered = true;
+      this.autoStart();
     }
   }
 
@@ -250,33 +292,43 @@ class Controller {
       this.ctx.beginPath();
       this.ctx.moveTo(0, 0);
       this.ctx.arc(0, 0, this.radius, startRad, endRad);
-      this.ctx.fillStyle = item.backgroundColor;
+      this.ctx.fillStyle = item.background;
       this.ctx.fill();
       this.ctx.restore();
       this.ctx.save();
       this.ctx.rotate(startRad + (PI / 2) + (this.eachRad / 2));
       this.ctx.save();
-      // 绘制奖品文字
-      this.ctx.translate(0, -0.7 * this.radius);
-      this.ctx.font = item.fontStyle;
-      this.ctx.fillStyle = '#000000';
-      this.ctx.fillText(
-        item.title,
-        -this.ctx.measureText(item.title).width / 2,
-        0,
-        100,
-      );
-      this.ctx.restore();
-      // 绘制奖品图片
-      if (item.image && item.image.canvasImageSource) {
-        this.ctx.translate(0, -0.6 * this.radius);
-        this.ctx.drawImage(
-          item.image.canvasImageSource,
-          -item.image.width / 2,
+      // 绘制文字
+      item.texts.forEach((textItem) => {
+        this.ctx.save();
+        this.ctx.translate(0, -(textItem.fromCenter) * this.radius);
+        this.ctx.font = textItem.fontStyle;
+        this.ctx.fillStyle = textItem.fontColor || '#000000';
+        this.ctx.fillText(
+          textItem.text,
+          -this.ctx.measureText(textItem.text).width / 2,
           0,
-          item.image.width,
-          item.image.height,
+          100,
         );
+        this.ctx.restore();
+      });
+      this.ctx.restore();
+      // 绘制图片
+      if (Array.isArray(item.images)) {
+        item.images.forEach((imageItem) => {
+          if (imageItem.canvasImageSource) {
+            this.ctx.save();
+            this.ctx.translate(0, -(imageItem.fromCenter) * this.radius);
+            this.ctx.drawImage(
+              imageItem.canvasImageSource,
+              -imageItem.width / 2,
+              0,
+              imageItem.width,
+              imageItem.height,
+            );
+            this.ctx.restore();
+          }
+        });
       }
       this.ctx.restore();
       this.ctx.restore();

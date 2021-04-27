@@ -11,7 +11,7 @@ declare namespace TurntableTypes {
   interface PrizeText {
     text: string,
     fontStyle: string,
-    fontColor: string,
+    fontColor?: string,
     fromCenter: number,
   }
 

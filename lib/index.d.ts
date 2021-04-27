@@ -5,29 +5,39 @@ declare namespace TurntableTypes {
     canvasImageSource?: CanvasImageSource,
     width: number,
     height: number,
+    fromCenter: number,
+  }
+
+  interface PrizeText {
+    text: string,
+    fontStyle: string,
+    fontColor: string,
+    fromCenter: number,
   }
 
   interface Prize {
-    title: string,
-    backgroundColor: string,
-    fontStyle: string,
-    fontColor?: string,
-    image?: PrizeImage | null,
+    texts: PrizeText[],
+    background: string,
+    images?: PrizeImage[],
   }
 
   interface ControllerOpts {
     onComplete: (prizeIndex: number) => void,
     timeout: number,
     onTimeout: () => void,
+    auto: boolean,
+    autoSpeed: number, // 1 - 5
+    autoDelay: number,
     renderIfLoaded: boolean,
     renderIfLoadedTimeout: number,
     pointToMiddle: boolean,
+    turntableBackground: string,
   }
 
   interface Props extends Partial<ControllerOpts> {
     size: number,
     prizes: Prize[],
-    onDraw: (abort: () => void) => Promise<number>,
+    onStart: (abort: () => void) => Promise<number> | false,
     children?: React.ReactNode,
   }
 

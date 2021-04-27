@@ -3,11 +3,9 @@
 
 ## 使用
 `npm install turntable-react`
- 或者
-`yarn add turntable-react`
 
-<span id="example">example</span>:
-```
+## <span id="example">example</span>:
+```js
 import Turntable from 'turntable-react';
 
 <Turntable
@@ -25,7 +23,8 @@ import Turntable from 'turntable-react';
 ```
 
 ## Turntable Props
-| propName | type | desc | required | default |
+
+| propName | type | desc | required | default |<br>
 | :-: | :-: | :-: | :-: | :-: | :-: |
 | size | number | 转盘大小，数值，像素单位 | true | - |
 | prizes | [Prize[]](#Prize) | 奖品数据 | true | - |
@@ -41,26 +40,29 @@ import Turntable from 'turntable-react';
 | renderIfLoadedTimeout | number | 开启 renderIfLoaded 后，若指定时间没有加载完所有图片，将不会等待直接绘制转盘。单位毫秒 | false | 300 |
 | pointToMiddle | boolean | 转盘指针指向第一个奖品正中心，而不是第一个与最后一个间隙 | false | false |
 | turntableBackground | string | 转盘背景色 | false | transparent |
-
-
+<br>
 ## Turntable sub types
-##### <span id="Prize">Prize</span>
-| propName | type | desc | required | default |
+
+### <span id="Prize">Prize</span>
+
+| propName | type | desc | required | default |<br>
 | :-: | :-: | :-: | :-: | :-: | :-: |
 | texts | [PrizeText[]](#PrizeText) | 待绘制文本数组 | true | - |
 | background | string | 奖品块的背景色 | true | - |
 | images | [PrizeImage[]](#PrizeImage) | 待绘制的图片数组 | false | - |
+<br>
+### <span id="PrizeText">PrizeText</span>
 
-##### <span id="PrizeText">PrizeText</span>
-| propName | type | desc | required | default |
+| propName | type | desc | required | default |<br>
 | :-: | :-: | :-: | :-: | :-: | :-: |
 | text | string | 文本 | true | - |
 | fontStyle | string | 与css font 属性相同，注意要传入默认字体，如 '16px Arial' | true | - |
 | fontColor | string | 字体颜色 | false | #000000 |
 | fromCenter | number | 文字距中心位置距离，取值范围 [0, 1] | true | - |
+<br>
+### <span id="PrizeImage">PrizeImage</span>
 
-##### <span id="PrizeImage">PrizeImage</span>
-| propName | type | desc | required | default |
+| propName | type | desc | required | default |<br>
 | :-: | :-: | :-: | :-: | :-: | :-: |
 | src | string | 图片链接，可选(与 canvasImageSource 二选一)，使用 src 属性，组件将 `new Image()` 创建 img 对象，对图片有其它需求的可以自己创建图片对象到 canvasImageSource  | false | - |
 | canvasImageSource | CanvasImageSource | 自行创建 canvas 支持的图片对象 `type CanvasImageSource = HTMLOrSVGImageElement HTMLVideoElement HTMLCanvasElement ImageBitmap OffscreenCanvas;` | false | - |

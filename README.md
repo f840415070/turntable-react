@@ -5,7 +5,7 @@
 `npm install turntable-react`
 
 ## <span id="example">example</span>:
-```js
+```ts
 import Turntable from 'turntable-react';
 
 <Turntable
@@ -40,7 +40,7 @@ import Turntable from 'turntable-react';
 | renderIfLoadedTimeout | number | 开启 renderIfLoaded 后，若指定时间没有加载完所有图片，将不会等待直接绘制转盘。单位毫秒 | false | 300 |
 | pointToMiddle | boolean | 转盘指针指向第一个奖品正中心，而不是第一个与最后一个间隙 | false | false |
 | turntableBackground | string | 转盘背景色 | false | transparent |
-<br>
+
 ## Turntable sub types
 
 ### <span id="Prize">Prize</span>
@@ -50,7 +50,7 @@ import Turntable from 'turntable-react';
 | texts | [PrizeText[]](#PrizeText) | 待绘制文本数组 | true | - |
 | background | string | 奖品块的背景色 | true | - |
 | images | [PrizeImage[]](#PrizeImage) | 待绘制的图片数组 | false | - |
-<br>
+
 ### <span id="PrizeText">PrizeText</span>
 
 | propName | type | desc | required | default |<br>
@@ -59,7 +59,7 @@ import Turntable from 'turntable-react';
 | fontStyle | string | 与css font 属性相同，注意要传入默认字体，如 '16px Arial' | true | - |
 | fontColor | string | 字体颜色 | false | #000000 |
 | fromCenter | number | 文字距中心位置距离，取值范围 [0, 1] | true | - |
-<br>
+
 ### <span id="PrizeImage">PrizeImage</span>
 
 | propName | type | desc | required | default |<br>

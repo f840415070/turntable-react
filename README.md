@@ -12,12 +12,14 @@
 
 ## TODO
 - 支持指针旋转模式
-- 增加等待中奖结果返回再转动抽奖的模式
+- 增加延时启动的模式（即等待抽奖接口结果返回再转动抽奖）
 
 ## Use
-`npm install turntable-react`
+`npm install turntable-react` <br>
+or use yarn <br>
+`yarn add turntable-react`
 
-## <span id="example">example</span>:
+## <span id="example">Example</span>:
 ```ts
 import Turntable from 'turntable-react';
 

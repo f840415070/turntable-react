@@ -22,6 +22,7 @@ or use yarn <br>
 `yarn add turntable-react`
 
 ### <span id="example">Example</span>
+<a href="https://github.com/f840415070/turntable-react/blob/master/sample/App.tsx">detail example</a>
 ```ts
 import Turntable from 'turntable-react';
 
@@ -40,7 +41,7 @@ import Turntable from 'turntable-react';
 ```
 
 ### Run sample
-1. `git clone`
+1. `git clone https://github.com/f840415070/turntable-react.git`
 2. `cd turntable-react`
 3. `yarn && yarn start`
 4. open broswer: `http://localhost:8080/`

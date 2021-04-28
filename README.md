@@ -23,7 +23,7 @@ or use yarn <br>
 
 ### <span id="example">Example</span>
 <a href="https://github.com/f840415070/turntable-react/blob/master/sample/App.tsx">detail example</a>
-```ts
+```js
 import Turntable from 'turntable-react';
 
 <Turntable
@@ -54,12 +54,13 @@ import Turntable from 'turntable-react';
 | prizes | [Prize[]](#Prize) | 奖品数据 | true | - |
 | onStart | (abort: () => void) => Promise<number> or false | 点击指针时执行的函数，请求的中奖数据的接口可以写在 Promise 中并返回；返回 Promise 对象时，resolve 奖品在 prizes 里的索引，返回 false 时，转盘不会启动；在转盘转动时可使用 abort 函数主动中止转动 | true | - |
 | children | React.ReactNode | 转盘指针，点击按钮的自定义样式，被 Turntable 组件包裹的子代节点，如 [example](#example) | false | - |
+| duration | number | 至少要转多长时间，单位毫秒，最小值3000 | false | 3000
 | onComplete | (prizeIndex: number) => void | 抽奖结束即转盘停止转动后执行的回调函数，组件传递的参数是中奖的索引 | false | - |
 | timeout | number | 超时时间，毫秒 | false | 10000 |
 | onTimeout | () => void | 超时执行的回调 | false | - |
-| auto | boolean | 初始化后没有被点击，转盘将匀速自动转动 | false | true
+| auto | boolean | 如果转盘没有被启动，将匀速自动转动 | false | true
 | autoSpeed | number | 自动转动的速度，取值范围 [1, 5] | false | 2 |
-| autoDelay | number | 初始化后多少毫秒没有被点击将自动转动 | false | 2000 |
+| autoDelay | number | 指定时间如果转盘没有被启动，将匀速自动转动，单位毫秒 | false | 5000 |
 | renderIfLoaded | boolean | 如果有图片需要绘制，组件会等待图片加载完成后才绘制转盘（图片没有下载完，canvas drawImage 会失败）| false | true |
 | renderIfLoadedTimeout | number | 开启 renderIfLoaded 后，若指定时间没有加载完所有图片，将不会等待直接绘制转盘。单位毫秒 | false | 300 |
 | pointToMiddle | boolean | 转盘指针指向第一个奖品正中心，而不是第一个与最后一个间隙 | false | false |

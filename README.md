@@ -10,7 +10,7 @@
 - 支持渲染多行文本，多张图片
 - 支持自动旋转
 - 样式完全自定义
-- 从开始到结束转动速度由快至慢
+- 缓慢结束效果
 
 ## TODO
 - 支持指针旋转模式
@@ -88,7 +88,7 @@ import Turntable from 'turntable-react';
 | propName | type | desc | required | default |<br>
 | :-: | :-: | :-: | :-: | :-: | :-: |
 | src | string | 图片链接，可选(与 canvasImageSource 二选一)，使用 src 属性，组件将 `new Image()` 创建 img 对象，对图片有其它需求的可以自己创建图片对象到 canvasImageSource  | false | - |
-| canvasImageSource | CanvasImageSource | 自行创建 canvas 支持的图片对象 `type CanvasImageSource = HTMLOrSVGImageElement HTMLVideoElement HTMLCanvasElement ImageBitmap OffscreenCanvas;` | false | - |
+| canvasImageSource | CanvasImageSource | 自行创建 canvas 支持的图片对象 `type CanvasImageSource = <HTMLOrSVGImageElement>, <HTMLVideoElement>, <HTMLCanvasElement>, <ImageBitmap>, <OffscreenCanvas>` | false | - |
 | width | number | 图片宽度 | true | - |
 | height | number | 图片高度 | true | - |
 | fromCenter | number | 图片距中心位置距离，取值范围 [0, 1] | true | - |

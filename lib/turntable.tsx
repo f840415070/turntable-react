@@ -40,7 +40,7 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
   return (
     <div
       className="__turntable-container"
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', width: `${size}px`, height: `${size}px` }}
     >
       <canvas id="__turntable-canvas" width={size} height={size}>
         You need to update your browser to support canvas.
@@ -51,8 +51,8 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
+          width: `${size}px`,
+          height: `${size}px`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

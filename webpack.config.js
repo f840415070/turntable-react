@@ -5,6 +5,10 @@ module.exports = {
   entry: {
     main: './sample/index.tsx',
   },
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve('./sample_dist'),
+  },
   module: {
     rules: [
       {

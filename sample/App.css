@@ -2,35 +2,40 @@ body {
   background: #08438B;
 }
 
+#root {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
 .turntable {
-  width: 360px;
-  height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 375px;
+  height: 375px;
   margin: 50px auto;
+  background: url(../sample/plate.png) no-repeat center center/100%;
+}
+
+.__turntable-container {
+  margin-top: 4px;
 }
 
 .turntable-pointer {
   position: relative;
   display: flex;
   justify-content: center;
-  width: 120px;
-  height: 120px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   background: #fff;
 }
 
 .pointer-img {
   position: absolute;
-  bottom: 10px;
-  width: 100px;
-}
-
-.pointer-img:hover {
-  transform: scale(0.9);
-  transition: transform .1s linear;
-  cursor: pointer;
-}
-
-.pointer-img:active {
-  transform: scale(0.8);
-  transition: transform .1s linear;
+  bottom: 5px;
+  width: 80px;
 }

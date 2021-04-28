@@ -1,34 +1,34 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import React from 'react';
 import Turntable from '../lib/turntable';
 import './App.css';
 
-const testColors: string[] = [
-  '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF', '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF',
+const prizeBackgrounds: string[] = [
+  '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF',
+  '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF',
 ];
-const testPrizes: TurntableTypes.Prize[] = Array(8).fill(0).map((_, index) => ({
+const prizes: TurntableTypes.Prize[] = Array(8).fill(0).map((_, index) => ({
   texts: index === 0 ? [
     {
-      text: '谢谢', fontStyle: '16px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.8,
+      text: '谢谢', fontStyle: '13px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.8,
     },
     {
-      text: '参与', fontStyle: '16px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.68,
+      text: '参与', fontStyle: '13px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.68,
     },
   ] : [
     {
-      text: '奖品价值', fontStyle: '16px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.8,
+      text: '奖品价值', fontStyle: '13px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.8,
     },
     {
-      text: `${index * 1000}元`, fontStyle: '16px Arial', fontColor: 'rgba(255, 40, 40, 1)', fromCenter: 0.68,
+      text: `${index * 1000}元`, fontStyle: '13px Arial', fontColor: 'rgba(255, 40, 40, 1)', fromCenter: 0.68,
     },
   ],
-  background: testColors[index],
+  background: prizeBackgrounds[index],
   images: index === 0 ? undefined : [
     {
       src: '../sample/gift.png',
-      width: 30,
-      height: 30,
-      fromCenter: 0.6,
+      width: 25,
+      height: 25,
+      fromCenter: 0.65,
     },
   ],
 }));
@@ -53,7 +53,7 @@ function App() {
   };
 
   const complete = (index: number) => {
-    console.log(`恭喜你抽中 - ${[index]} `, testPrizes[index]);
+    console.log(`恭喜你抽中 - ${[index]} `, prizes[index]);
   };
 
   const timeout = () => {
@@ -63,8 +63,8 @@ function App() {
   return (
     <div className="turntable">
       <Turntable
-        size={360}
-        prizes={testPrizes}
+        size={268}
+        prizes={prizes}
         onStart={fetchPrizeResult}
         onComplete={complete}
         onTimeout={timeout}

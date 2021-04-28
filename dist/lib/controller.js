@@ -38,8 +38,9 @@ function checkOpts(opts) {
         onTimeout: typeof opts.onTimeout === 'function' ? opts.onTimeout : function () { },
         auto: opts.auto !== false,
         autoSpeed: opts.autoSpeed && opts.autoSpeed > 0 && opts.autoSpeed < 6 ? opts.autoSpeed : 2,
-        autoDelay: opts.autoDelay && opts.autoDelay >= 0 ? opts.autoDelay : 2000,
+        autoDelay: opts.autoDelay && opts.autoDelay >= 0 ? opts.autoDelay : 5000,
         turntableBackground: opts.turntableBackground ? opts.turntableBackground : 'transparent',
+        duration: opts.duration && opts.duration >= 3000 ? opts.duration : 3000,
     });
 }
 var Controller = /** @class */ (function () {
@@ -120,12 +121,24 @@ var Controller = /** @class */ (function () {
     Controller.prototype.abort = function () {
         this.isAborted = true;
     };
-    Controller.prototype.reset = function () {
+    Controller.prototype._reset = function () {
         this.isRotating = false;
-        this.startRad = this._initStartRad;
-        this._CURRENT_PRIZE_INDEX = -9999;
         this.isAborted = false;
+        this._CURRENT_PRIZE_INDEX = -9999;
         this.ref.timeNode = +new Date();
+    };
+    Controller.prototype.reset = function () {
+        this._reset();
+        this.startRad = this._initStartRad;
+    };
+    Controller.prototype.finish = function () {
+        this._reset();
+        if (this.opts.auto) {
+            this.autoStart();
+        }
+        else {
+            this.startRad = this._initStartRad;
+        }
     };
     Controller.prototype.rotate = function () {
         this.cancelAuto();
@@ -139,7 +152,7 @@ var Controller = /** @class */ (function () {
         this.startRad += (rotateRad - this.startRad) / 20;
         if (rotateRad - this.startRad <= 0.01) {
             this.opts.onComplete(this.currentPrizeIndex);
-            this.reset();
+            this.finish();
             return;
         }
         this._render();
@@ -149,7 +162,8 @@ var Controller = /** @class */ (function () {
     };
     Controller.prototype._rotate = function (startTime) {
         var _this = this;
-        if (this.currentPrizeIndex >= 0) {
+        if (this.currentPrizeIndex >= 0
+            && +new Date() - startTime > (this.opts.duration - 3000)) {
             this.startRad = this._initStartRad;
             var rotateRad = this.rotateToPointerRads[this.currentPrizeIndex]
                 + 40 * PI
@@ -161,11 +175,13 @@ var Controller = /** @class */ (function () {
             this.reset();
             this._render();
             this.opts.onTimeout();
+            this.autoStart();
             return;
         }
         if (this.isAborted) {
             this.reset();
             this._render();
+            this.autoStart();
             return;
         }
         this.startRad = this._nextStartRad;

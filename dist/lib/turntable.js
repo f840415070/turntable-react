@@ -61,14 +61,14 @@ var Turntable = function (props) {
             drawing(startResult, controller.ref.timeNode);
         }
     };
-    return (react_1.default.createElement("div", { className: "__turntable-container", style: { position: 'relative' } },
+    return (react_1.default.createElement("div", { className: "__turntable-container", style: { position: 'relative', width: size + "px", height: size + "px" } },
         react_1.default.createElement("canvas", { id: "__turntable-canvas", width: size, height: size }, "You need to update your browser to support canvas."),
         react_1.default.createElement("div", { className: "__turntable-over-box", style: {
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                width: '100%',
-                height: '100%',
+                width: size + "px",
+                height: size + "px",
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

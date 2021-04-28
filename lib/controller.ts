@@ -51,6 +51,7 @@ function checkOpts(opts: Partial<TurntableTypes.ControllerOpts>): TurntableTypes
     autoSpeed: opts.autoSpeed && opts.autoSpeed > 0 && opts.autoSpeed < 6 ? opts.autoSpeed : 2,
     autoDelay: opts.autoDelay && opts.autoDelay >= 0 ? opts.autoDelay : 5000,
     turntableBackground: opts.turntableBackground ? opts.turntableBackground : 'transparent',
+    duration: opts.duration && opts.duration >= 3000 ? opts.duration : 3000,
   });
 }
 
@@ -196,7 +197,9 @@ class Controller {
   }
 
   _rotate(startTime: number) {
-    if (this.currentPrizeIndex >= 0) {
+    if (this.currentPrizeIndex >= 0
+      && +new Date() - startTime > (this.opts.duration - 3000)
+    ) {
       this.startRad = this._initStartRad;
       const rotateRad = this.rotateToPointerRads[this.currentPrizeIndex]
         + 40 * PI

@@ -49,7 +49,7 @@ function checkOpts(opts: Partial<TurntableTypes.ControllerOpts>): TurntableTypes
     onTimeout: typeof opts.onTimeout === 'function' ? opts.onTimeout : () => {},
     auto: opts.auto !== false,
     autoSpeed: opts.autoSpeed && opts.autoSpeed > 0 && opts.autoSpeed < 6 ? opts.autoSpeed : 2,
-    autoDelay: opts.autoDelay && opts.autoDelay >= 0 ? opts.autoDelay : 2000,
+    autoDelay: opts.autoDelay && opts.autoDelay >= 0 ? opts.autoDelay : 5000,
     turntableBackground: opts.turntableBackground ? opts.turntableBackground : 'transparent',
   });
 }
@@ -153,12 +153,25 @@ class Controller {
     this.isAborted = true;
   }
 
-  reset() {
+  _reset() {
     this.isRotating = false;
-    this.startRad = this._initStartRad;
-    this._CURRENT_PRIZE_INDEX = -9999;
     this.isAborted = false;
+    this._CURRENT_PRIZE_INDEX = -9999;
     this.ref.timeNode = +new Date();
+  }
+
+  reset() {
+    this._reset();
+    this.startRad = this._initStartRad;
+  }
+
+  finish() {
+    this._reset();
+    if (this.opts.auto) {
+      this.autoStart();
+    } else {
+      this.startRad = this._initStartRad;
+    }
   }
 
   rotate() {
@@ -173,7 +186,7 @@ class Controller {
     this.startRad += (rotateRad - this.startRad) / 20;
     if (rotateRad - this.startRad <= 0.01) {
       this.opts.onComplete(this.currentPrizeIndex);
-      this.reset();
+      this.finish();
       return;
     }
     this._render();
@@ -195,11 +208,13 @@ class Controller {
       this.reset();
       this._render();
       this.opts.onTimeout();
+      this.autoStart();
       return;
     }
     if (this.isAborted) {
       this.reset();
       this._render();
+      this.autoStart();
       return;
     }
 

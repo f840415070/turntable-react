@@ -24,11 +24,12 @@ declare namespace TurntableTypes {
   }
 
   interface ControllerOpts {
+    duration: number,
     onComplete: (prizeIndex: number) => void,
     timeout: number,
     onTimeout: () => void,
     auto: boolean,
-    autoSpeed: number, // 1 - 5
+    autoSpeed: number,
     autoDelay: number,
     renderIfLoaded: boolean,
     renderIfLoadedTimeout: number,

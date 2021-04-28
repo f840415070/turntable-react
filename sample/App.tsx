@@ -6,7 +6,7 @@ const prizeBackgrounds: string[] = [
   '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF',
   '#62CDD8', '#FFFFFF', '#FEB446', '#FFFFFF',
 ];
-const prizes: TurntableTypes.Prize[] = Array(8).fill(0).map((_, index) => ({
+const prizes = Array(8).fill(0).map((_, index) => ({
   texts: index === 0 ? [
     {
       text: '谢谢', fontStyle: '13px Arial', fontColor: 'rgba(70, 47, 47, 1)', fromCenter: 0.8,
@@ -68,6 +68,7 @@ function App() {
         onStart={fetchPrizeResult}
         onComplete={complete}
         onTimeout={timeout}
+        duration={4000}
       >
         {/* 转盘指针 点击按钮 */}
         <div className="turntable-pointer">

@@ -3,6 +3,8 @@
 
 <img src="https://github.com/f840415070/turntable-react/raw/master/demo.jpg" width="300" alt="demo" />
 
+<a href="https://codepen.io/fanyibin/pen/WNRWyOz">**在线demo演示**</a>
+
 ## Features
 - 即时启动，不必等待抽奖结果的接口返回再启动转盘，先转起来再说~
 - 超时控制

@@ -1,14 +1,30 @@
 {
   "name": "turntable-react",
-  "private": true,
-  "version": "1.0.0",
+  "main": "dist/lib/turntable.js",
+  "version": "0.0.1",
+  "description": "React 抽奖转盘组件，基于 HTML canvas，支持即时转动",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f840415070/turntable-react.git"
+  },
+  "author": "fanyibin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/f840415070/turntable-react/issues"
+  },
+  "homepage": "https://github.com/f840415070/turntable-react#readme",
+  "keywords": [
+    "turntable",
+    "react component",
+    "lottery turntable",
+    "抽奖转盘"
+  ],
+  "files": ["dist/"],
   "scripts": {
     "start": "webpack-dev-server --mode development --host 0.0.0.0",
-    "build": "webpack --mode production"
+    "build": "tsc"
   },
-  "dependencies": {
-
-  },
+  "dependencies": {},
   "devDependencies": {
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

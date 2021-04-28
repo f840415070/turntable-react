@@ -1,14 +1,14 @@
 # turntable-react
 > React 抽奖转盘组件，基于 HTML canvas
 
-![demo](https://github.com/f840415070/turntable-react/master/demo.jpg)
+<img src="https://github.com/f840415070/turntable-react/raw/master/demo.jpg" width="300" alt="demo" />
 
 ## Features
 - 即时启动，不必等待抽奖结果的接口返回再启动转盘，先转起来再说~
 - 超时控制
 - 支持主动中断
 - 支持渲染多行文本，多张图片
-- 支持闲置时自动旋转
+- 支持自动旋转
 - 样式完全自定义
 - 从开始到结束转动速度由快至慢
 
@@ -21,13 +21,13 @@
 or use yarn <br>
 `yarn add turntable-react`
 
-## <span id="example">Example</span>
+### <span id="example">Example</span>
 ```ts
 import Turntable from 'turntable-react';
 
 <Turntable
-    size={360}
-    prizes={testPrizes}
+    size={300}
+    prizes={prizes}
     onStart={fetchPrizeResult}
     onComplete={complete}
     onTimeout={timeout}
@@ -38,6 +38,12 @@ import Turntable from 'turntable-react';
     </div>
 </Turntable>
 ```
+
+### Run sample
+1. `git clone`
+2. `cd turntable-react`
+3. `yarn && yarn start`
+4. open broswer: `http://localhost:8080/`
 
 ## Turntable Props
 

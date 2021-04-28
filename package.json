@@ -1,7 +1,7 @@
 {
   "name": "turntable-react",
   "main": "dist/lib/turntable.js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "React 抽奖转盘组件，基于 HTML canvas，支持即时转动",
   "repository": {
     "type": "git",

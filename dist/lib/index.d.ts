@@ -1,4 +1,5 @@
-/* eslint-disable no-unused-vars */
+import { FC } from 'react';
+
 declare namespace TurntableTypes {
   interface PrizeImage {
     src?: string,
@@ -43,3 +44,6 @@ declare namespace TurntableTypes {
 
   type controllerRef = {timeNode: number}
 }
+
+declare const Turntable: FC<TurntableTypes.Props>;
+export default Turntable;

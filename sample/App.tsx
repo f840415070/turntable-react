@@ -35,8 +35,14 @@ const prizes = Array(8).fill(0).map((_, index) => ({
 
 function App() {
   const canStart = true;
+
+  const toast = (msg: string) => {
+    console.log(msg);
+  };
+
   const fetchPrizeResult = (abort: () => void) => {
     if (!canStart) { // 未达条件不启动抽奖
+      toast('no times!');
       return false;
     }
     return new Promise<number>((resolve, reject) => {
@@ -45,6 +51,7 @@ function App() {
         const resultPrizeIndex = Math.floor(Math.random() * 8);
         if (resultPrizeIndex < 0) { // 未达条件不启动抽奖
           reject();
+          toast('something is wrong!');
         } else {
           resolve(resultPrizeIndex);
         }
@@ -68,7 +75,7 @@ function App() {
         onStart={fetchPrizeResult}
         onComplete={complete}
         onTimeout={timeout}
-        duration={4000}
+        mode="waiting"
       >
         {/* 转盘指针 点击按钮 */}
         <div className="turntable-pointer">

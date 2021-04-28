@@ -22,6 +22,7 @@ declare namespace TurntableTypes {
   }
 
   interface ControllerOpts {
+    mode: 'immediate' | 'waiting',
     duration: number,
     onComplete: (prizeIndex: number) => void,
     timeout: number,

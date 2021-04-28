@@ -52,6 +52,7 @@ function checkOpts(opts: Partial<TurntableTypes.ControllerOpts>): TurntableTypes
     autoDelay: opts.autoDelay && opts.autoDelay >= 0 ? opts.autoDelay : 5000,
     turntableBackground: opts.turntableBackground ? opts.turntableBackground : 'transparent',
     duration: opts.duration && opts.duration >= 3000 ? opts.duration : 3000,
+    mode: opts.mode === 'waiting' ? 'waiting' : 'immediate',
   });
 }
 
@@ -64,7 +65,6 @@ class Controller {
   private startRad: number; // 起始弧度
   private eachRad: number; // 每个奖品块的平均弧度
   private rotateToPointerRads: number[]; // Array<从每个奖品块中点的弧度到指针指向中心的弧度值>
-  private opts: TurntableTypes.ControllerOpts;
   private isInitRendered: boolean; // 初次渲染完成
   private _CURRENT_PRIZE_INDEX: number; // 中奖的索引
   private isAborted: boolean; // 中止转动
@@ -74,6 +74,7 @@ class Controller {
   }; // 自动旋转配置
 
   public isRotating: boolean;
+  public opts: TurntableTypes.ControllerOpts;
   public ref: TurntableTypes.controllerRef;
 
   constructor(
@@ -144,6 +145,12 @@ class Controller {
     return this._CURRENT_PRIZE_INDEX;
   }
 
+  get _radToRotate() {
+    return this.rotateToPointerRads[this.currentPrizeIndex]
+      + 40 * PI
+      + (this.opts.pointToMiddle ? (this.eachRad / 2) : 0);
+  }
+
   setCurrentPrizeIndex(index: number) {
     if (index >= 0) {
       this._CURRENT_PRIZE_INDEX = index;
@@ -176,23 +183,29 @@ class Controller {
   }
 
   rotate() {
+    console.log(this.currentPrizeIndex);
     this.cancelAuto();
     this.isRotating = true;
     const runTime = +new Date();
-    this._rotate(runTime);
     this.ref.timeNode = runTime;
+    if (this.opts.mode === 'immediate') {
+      this._rotate(runTime);
+    } else {
+      console.log(this.currentPrizeIndex);
+      this._easeRotate(this._radToRotate);
+    }
   }
 
-  _easeRotate(rotateRad: number) {
-    this.startRad += (rotateRad - this.startRad) / 20;
-    if (rotateRad - this.startRad <= 0.01) {
+  _easeRotate(radToRotate: number) {
+    this.startRad += (radToRotate - this.startRad) / 20;
+    if (radToRotate - this.startRad <= 0.01) {
       this.opts.onComplete(this.currentPrizeIndex);
       this.finish();
       return;
     }
     this._render();
     requestAnimationFrame(() => {
-      this._easeRotate(rotateRad);
+      this._easeRotate(radToRotate);
     });
   }
 
@@ -201,23 +214,15 @@ class Controller {
       && +new Date() - startTime > (this.opts.duration - 3000)
     ) {
       this.startRad = this._initStartRad;
-      const rotateRad = this.rotateToPointerRads[this.currentPrizeIndex]
-        + 40 * PI
-        + (this.opts.pointToMiddle ? (this.eachRad / 2) : 0);
-      this._easeRotate(rotateRad);
+      this._easeRotate(this._radToRotate);
       return;
     }
     if (+new Date() - startTime > this.opts.timeout) {
-      this.reset();
-      this._render();
-      this.opts.onTimeout();
-      this.autoStart();
+      this.timeoutEvent();
       return;
     }
     if (this.isAborted) {
-      this.reset();
-      this._render();
-      this.autoStart();
+      this.abortEvent();
       return;
     }
 
@@ -226,6 +231,21 @@ class Controller {
     requestAnimationFrame(() => {
       this._rotate(startTime);
     });
+  }
+
+  timeoutEvent() {
+    this.restartEvent();
+    this.opts.onTimeout();
+  }
+
+  abortEvent() {
+    this.restartEvent();
+  }
+
+  restartEvent() {
+    this.reset();
+    this._render();
+    this.autoStart();
   }
 
   autoStart() {

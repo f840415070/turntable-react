@@ -27,6 +27,7 @@ declare namespace TurntableTypes {
     onComplete: (prizeIndex: number) => void,
     timeout: number,
     onTimeout: () => void,
+    onStateChange: (isDrawing: boolean) => void,
     auto: boolean,
     autoSpeed: number,
     autoDelay: number,

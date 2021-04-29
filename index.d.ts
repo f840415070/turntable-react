@@ -24,10 +24,12 @@ declare namespace TurntableTypes {
   }
 
   interface ControllerOpts {
+    mode: 'immediate' | 'waiting',
     duration: number,
     onComplete: (prizeIndex: number) => void,
     timeout: number,
     onTimeout: () => void,
+    onStateChange: (isDrawing: boolean) => void,
     auto: boolean,
     autoSpeed: number,
     autoDelay: number,

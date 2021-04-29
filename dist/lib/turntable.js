@@ -49,16 +49,37 @@ var Turntable = function (props) {
                 controller.setCurrentPrizeIndex(index);
             }
         })
-            .catch(function () { });
+            .catch(function () {
+            controller.abort();
+        });
+    };
+    var drawingAfterGotResult = function (fetchResult, startTime) {
+        controller.changeState(true);
+        controller.recordTimeout(startTime);
+        fetchResult
+            .then(function (index) {
+            if (startTime === controller.ref.timeNode) {
+                controller.setCurrentPrizeIndex(index);
+                controller.rotate();
+            }
+        })
+            .catch(function () {
+            controller.abort();
+        });
     };
     var run = function () {
-        if (controller.isRotating)
+        if (controller.isDrawing)
             return;
         var startResult = onStart(controller.abort.bind(controller));
         if (startResult instanceof Promise) {
             controller.reset();
-            controller.rotate();
-            drawing(startResult, controller.ref.timeNode);
+            if (controller.opts.mode === 'immediate') {
+                controller.rotate();
+                drawing(startResult, controller.ref.timeNode);
+            }
+            else {
+                drawingAfterGotResult(startResult, controller.ref.timeNode);
+            }
         }
     };
     return (react_1.default.createElement("div", { className: "__turntable-container", style: { position: 'relative', width: size + "px", height: size + "px" } },

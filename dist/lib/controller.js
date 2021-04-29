@@ -41,6 +41,8 @@ function checkOpts(opts) {
         autoDelay: opts.autoDelay && opts.autoDelay >= 0 ? opts.autoDelay : 5000,
         turntableBackground: opts.turntableBackground ? opts.turntableBackground : 'transparent',
         duration: opts.duration && opts.duration >= 3000 ? opts.duration : 3000,
+        mode: opts.mode === 'waiting' ? 'waiting' : 'immediate',
+        onStateChange: typeof opts.onStateChange === 'function' ? opts.onStateChange : function () { },
     });
 }
 var Controller = /** @class */ (function () {
@@ -65,7 +67,7 @@ var Controller = /** @class */ (function () {
             return rotateRad > 0 ? rotateRad : rotateRad + 2 * PI;
         });
         this.isInitRendered = false;
-        this.isRotating = false;
+        this._isDrawing = false;
         this._CURRENT_PRIZE_INDEX = -9999;
         this.isAborted = false;
         this.ref = { timeNode: +new Date() };
@@ -92,6 +94,13 @@ var Controller = /** @class */ (function () {
         this.canvas.height = floor(this.size * devicePixelRatio);
         this.ctx.scale(devicePixelRatio, devicePixelRatio);
     };
+    Object.defineProperty(Controller.prototype, "isDrawing", {
+        get: function () {
+            return this._isDrawing;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Object.defineProperty(Controller.prototype, "_initStartRad", {
         get: function () {
             return -PI / 2 - (this.opts.pointToMiddle ? (this.eachRad / 2) : 0);
@@ -113,26 +122,41 @@ var Controller = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(Controller.prototype, "_radToRotate", {
+        get: function () {
+            return this.rotateToPointerRads[this.currentPrizeIndex]
+                + 40 * PI
+                + (this.opts.pointToMiddle ? (this.eachRad / 2) : 0);
+        },
+        enumerable: false,
+        configurable: true
+    });
     Controller.prototype.setCurrentPrizeIndex = function (index) {
         if (index >= 0) {
             this._CURRENT_PRIZE_INDEX = index;
         }
     };
+    Controller.prototype.clearLastPrizeIndex = function () {
+        this._CURRENT_PRIZE_INDEX = -9999;
+    };
+    Controller.prototype.changeState = function (state) {
+        if (this._isDrawing !== state) {
+            this._isDrawing = state;
+            this.opts.onStateChange(state);
+        }
+    };
     Controller.prototype.abort = function () {
         this.isAborted = true;
     };
-    Controller.prototype._reset = function () {
-        this.isRotating = false;
+    Controller.prototype.reset = function () {
+        this.autoStop();
+        this.changeState(false);
         this.isAborted = false;
-        this._CURRENT_PRIZE_INDEX = -9999;
         this.ref.timeNode = +new Date();
     };
-    Controller.prototype.reset = function () {
-        this._reset();
-        this.startRad = this._initStartRad;
-    };
     Controller.prototype.finish = function () {
-        this._reset();
+        this.reset();
+        this.clearLastPrizeIndex();
         if (this.opts.auto) {
             this.autoStart();
         }
@@ -141,23 +165,28 @@ var Controller = /** @class */ (function () {
         }
     };
     Controller.prototype.rotate = function () {
-        this.cancelAuto();
-        this.isRotating = true;
+        this.changeState(true);
         var runTime = +new Date();
-        this._rotate(runTime);
         this.ref.timeNode = runTime;
+        this.startRad = this._initStartRad;
+        if (this.opts.mode === 'immediate') {
+            this._rotate(runTime);
+        }
+        else {
+            this._easeRotate(this._radToRotate);
+        }
     };
-    Controller.prototype._easeRotate = function (rotateRad) {
+    Controller.prototype._easeRotate = function (radToRotate) {
         var _this = this;
-        this.startRad += (rotateRad - this.startRad) / 20;
-        if (rotateRad - this.startRad <= 0.01) {
+        this.startRad += (radToRotate - this.startRad) / 20;
+        if (radToRotate - this.startRad <= 0.01) {
             this.opts.onComplete(this.currentPrizeIndex);
             this.finish();
             return;
         }
         this._render();
         requestAnimationFrame(function () {
-            _this._easeRotate(rotateRad);
+            _this._easeRotate(radToRotate);
         });
     };
     Controller.prototype._rotate = function (startTime) {
@@ -165,23 +194,15 @@ var Controller = /** @class */ (function () {
         if (this.currentPrizeIndex >= 0
             && +new Date() - startTime > (this.opts.duration - 3000)) {
             this.startRad = this._initStartRad;
-            var rotateRad = this.rotateToPointerRads[this.currentPrizeIndex]
-                + 40 * PI
-                + (this.opts.pointToMiddle ? (this.eachRad / 2) : 0);
-            this._easeRotate(rotateRad);
+            this._easeRotate(this._radToRotate);
             return;
         }
         if (+new Date() - startTime > this.opts.timeout) {
-            this.reset();
-            this._render();
-            this.opts.onTimeout();
-            this.autoStart();
+            this.timeoutEvent();
             return;
         }
         if (this.isAborted) {
-            this.reset();
-            this._render();
-            this.autoStart();
+            this.abortEvent();
             return;
         }
         this.startRad = this._nextStartRad;
@@ -189,6 +210,27 @@ var Controller = /** @class */ (function () {
         requestAnimationFrame(function () {
             _this._rotate(startTime);
         });
+    };
+    Controller.prototype.timeoutEvent = function () {
+        this.restartEvent();
+        this.opts.onTimeout();
+    };
+    Controller.prototype.abortEvent = function () {
+        this.restartEvent();
+    };
+    Controller.prototype.recordTimeout = function (startTime) {
+        var _this = this;
+        setTimeout(function () {
+            if (startTime === _this.ref.timeNode) {
+                _this.timeoutEvent();
+            }
+        }, this.opts.timeout);
+    };
+    Controller.prototype.restartEvent = function () {
+        this.reset();
+        this.startRad = this._initStartRad;
+        this._render();
+        this.autoStart();
     };
     Controller.prototype.autoStart = function () {
         var _this = this;
@@ -198,11 +240,10 @@ var Controller = /** @class */ (function () {
             }, this.opts.autoDelay);
         }
     };
-    Controller.prototype.cancelAuto = function () {
+    Controller.prototype.autoStop = function () {
         if (this.opts.auto) {
             clearTimeout(this.autoConf.timer);
             cancelAnimationFrame(this.autoConf.rafHandle);
-            this.reset();
         }
     };
     Controller.prototype.autoRotate = function () {

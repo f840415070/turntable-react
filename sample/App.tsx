@@ -55,7 +55,7 @@ function App() {
         } else {
           resolve(resultPrizeIndex);
         }
-      }, 60);
+      }, 90);
     });
   };
 
@@ -67,6 +67,10 @@ function App() {
     console.log('已超时');
   };
 
+  const stateChange = (drawing: boolean) => {
+    console.log(drawing ? '进入抽奖' : '离开抽奖');
+  };
+
   return (
     <div className="turntable">
       <Turntable
@@ -75,7 +79,7 @@ function App() {
         onStart={fetchPrizeResult}
         onComplete={complete}
         onTimeout={timeout}
-        mode="waiting"
+        onStateChange={stateChange}
       >
         {/* 转盘指针 点击按钮 */}
         <div className="turntable-pointer">

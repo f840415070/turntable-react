@@ -56,10 +56,12 @@ import Turntable from 'turntable-react';
 | prizes | [Prize[]](#Prize) | 奖品数据 | true | - |
 | onStart | (abort: () => void) => Promise<number> or false | 点击指针时执行的函数，请求的中奖数据的接口可以写在 Promise 中并返回；返回 Promise 对象时，resolve 奖品在 prizes 里的索引，返回 false 时，转盘不会启动；在转盘转动时可使用 abort 函数主动中止转动 | true | - |
 | children | React.ReactNode | 转盘指针，点击按钮的自定义样式，被 Turntable 组件包裹的子代节点，如 [example](#example) | false | - |
+| mode | string | ['immediate', 'waiting'] 两种抽奖模式，immediate 发送接口后直接转动转盘，等待有中奖数据后再结束；waiting 等待有中奖数据后再转动转盘 | false | immediate |
 | duration | number | 至少要转多长时间，单位毫秒，最小值3000 | false | 3000
 | onComplete | (prizeIndex: number) => void | 抽奖结束即转盘停止转动后执行的回调函数，组件传递的参数是中奖的索引 | false | - |
 | timeout | number | 超时时间，毫秒 | false | 10000 |
 | onTimeout | () => void | 超时执行的回调 | false | - |
+| onStateChange | (isDrawing: boolean) => void | 抽奖状态改变方法，isDrawing true 进入抽奖状态，false 抽奖状态结束 | false | - |
 | auto | boolean | 如果转盘没有被启动，将匀速自动转动 | false | true
 | autoSpeed | number | 自动转动的速度，取值范围 [1, 5] | false | 2 |
 | autoDelay | number | 指定时间如果转盘没有被启动，将匀速自动转动，单位毫秒 | false | 5000 |

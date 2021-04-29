@@ -24,23 +24,28 @@ const Turntable: FC<TurntableTypes.Props> = (props: TurntableTypes.Props) => {
           controller.setCurrentPrizeIndex(index);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        controller.abort();
+      });
   };
 
   const drawingAfterGotResult = (fetchResult: Promise<number>, startTime: number) => {
+    controller.changeState(true);
+    controller.recordTimeout(startTime);
     fetchResult
       .then((index) => {
-        console.log(index, startTime === controller.ref.timeNode);
         if (startTime === controller.ref.timeNode) {
           controller.setCurrentPrizeIndex(index);
           controller.rotate();
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        controller.abort();
+      });
   };
 
   const run = () => {
-    if (controller.isRotating) return;
+    if (controller.isDrawing) return;
     const startResult = onStart(controller.abort.bind(controller));
     if (startResult instanceof Promise) {
       controller.reset();

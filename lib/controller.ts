@@ -53,6 +53,7 @@ function checkOpts(opts: Partial<TurntableTypes.ControllerOpts>): TurntableTypes
     turntableBackground: opts.turntableBackground ? opts.turntableBackground : 'transparent',
     duration: opts.duration && opts.duration >= 3000 ? opts.duration : 3000,
     mode: opts.mode === 'waiting' ? 'waiting' : 'immediate',
+    onStateChange: typeof opts.onStateChange === 'function' ? opts.onStateChange : () => {},
   });
 }
 
@@ -72,8 +73,8 @@ class Controller {
     timer: number,
     rafHandle: number,
   }; // 自动旋转配置
+  private _isDrawing: boolean;
 
-  public isRotating: boolean;
   public opts: TurntableTypes.ControllerOpts;
   public ref: TurntableTypes.controllerRef;
 
@@ -103,7 +104,7 @@ class Controller {
       return rotateRad > 0 ? rotateRad : rotateRad + 2 * PI;
     });
     this.isInitRendered = false;
-    this.isRotating = false;
+    this._isDrawing = false;
     this._CURRENT_PRIZE_INDEX = -9999;
     this.isAborted = false;
     this.ref = { timeNode: +new Date() };
@@ -133,6 +134,10 @@ class Controller {
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
   }
 
+  get isDrawing() {
+    return this._isDrawing;
+  }
+
   get _initStartRad() {
     return -PI / 2 - (this.opts.pointToMiddle ? (this.eachRad / 2) : 0);
   }
@@ -157,24 +162,31 @@ class Controller {
     }
   }
 
+  clearLastPrizeIndex() {
+    this._CURRENT_PRIZE_INDEX = -9999;
+  }
+
+  changeState(state: boolean) {
+    if (this._isDrawing !== state) {
+      this._isDrawing = state;
+      this.opts.onStateChange(state);
+    }
+  }
+
   abort() {
     this.isAborted = true;
   }
 
-  _reset() {
-    this.isRotating = false;
+  reset() {
+    this.autoStop();
+    this.changeState(false);
     this.isAborted = false;
-    this._CURRENT_PRIZE_INDEX = -9999;
     this.ref.timeNode = +new Date();
   }
 
-  reset() {
-    this._reset();
-    this.startRad = this._initStartRad;
-  }
-
   finish() {
-    this._reset();
+    this.reset();
+    this.clearLastPrizeIndex();
     if (this.opts.auto) {
       this.autoStart();
     } else {
@@ -183,15 +195,13 @@ class Controller {
   }
 
   rotate() {
-    console.log(this.currentPrizeIndex);
-    this.cancelAuto();
-    this.isRotating = true;
+    this.changeState(true);
     const runTime = +new Date();
     this.ref.timeNode = runTime;
+    this.startRad = this._initStartRad;
     if (this.opts.mode === 'immediate') {
       this._rotate(runTime);
     } else {
-      console.log(this.currentPrizeIndex);
       this._easeRotate(this._radToRotate);
     }
   }
@@ -242,8 +252,17 @@ class Controller {
     this.restartEvent();
   }
 
+  recordTimeout(startTime: number) {
+    setTimeout(() => {
+      if (startTime === this.ref.timeNode) {
+        this.timeoutEvent();
+      }
+    }, this.opts.timeout);
+  }
+
   restartEvent() {
     this.reset();
+    this.startRad = this._initStartRad;
     this._render();
     this.autoStart();
   }
@@ -256,11 +275,10 @@ class Controller {
     }
   }
 
-  cancelAuto() {
+  autoStop() {
     if (this.opts.auto) {
       clearTimeout(this.autoConf.timer);
       cancelAnimationFrame(this.autoConf.rafHandle);
-      this.reset();
     }
   }
 
